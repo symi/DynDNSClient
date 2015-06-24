@@ -27,12 +27,12 @@ function* checkAndUpdate() {
     if (ip === existingIp) return;
 
     // update all hosts and domains
-    config.domains.forEach(function* (domain) {
-        domain.hosts.forEach(function* (host) {
+    config.domains.forEach(co.wrap(function* (domain) {
+        domain.hosts.forEach(co.wrap(function* (host) {
             yield request(generateUrl(host, domain.name, ip));
-        });
-    });
-
+        }));
+    }));
+    
     existingIp = ip;
     console.log('ip updated to: ' + ip + ' @ ' + new Date());
 }
