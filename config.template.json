@@ -1,6 +1,5 @@
 {
     "interval": 900000,
-    "url": "https://example",
     "domains": [{
         "name": "example.com",
         "hosts": [

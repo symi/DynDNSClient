@@ -1,14 +1,16 @@
 var config = require('./config.json'),
-    co = require('co'),
-    request = require('co-request'),
+    suspend = require('suspend'),
+    request = require('request'),
     querystring = require('querystring'),
+    parseString = require('xml2js').parseString,
+    url = 'https://dynamicdns.park-your-domain.com/update',
     existingIp;
 
 /*
  * Returns a url string with query string.
  */
 function generateUrl(host, domain, ip) {
-    return config.url + '?' + querystring.stringify({
+    return url + '?' + querystring.stringify({
         domain: domain,
         host: host,
         password: config.password,
@@ -21,25 +23,44 @@ function generateUrl(host, domain, ip) {
  */
 function* checkAndUpdate() {
     // get our ip
-    var ip = (yield request('https://api.ipify.org')).body;
+    var ip = (yield request('https://api.ipify.org', suspend.resume())).body,
+        responses,
+        interfaceRes;
 
     // if not changed then do nothing
     if (ip === existingIp) return;
 
     // update all hosts and domains
-    config.domains.forEach(co.wrap(function* (domain) {
-        domain.hosts.forEach(co.wrap(function* (host) {
-            yield request(generateUrl(host, domain.name, ip));
-        }));
-    }));
+    config.domains.forEach(function (domain) {
+        domain.hosts.forEach(function (host) {
+            request(generateUrl(host, domain.name, ip), suspend.fork());
+        });
+    });
+    
+    responses = yield suspend.join();
+    
+    responses.forEach(function(res) {
+        parseString(res.body, suspend.fork());
+    });
+        
+    responses = yield suspend.join();
+    
+    responses.forEach(function(res) {
+        interfaceRes = res['interface-response'];
+        
+        if (interfaceRes.ErrCount[0] !== '0') {
+            console.error(interfaceRes);
+        } else {
+            console.log('ip updated to: ' + interfaceRes.IP[0] + ' @ ' + new Date());
+        }
+    });
     
     existingIp = ip;
-    console.log('ip updated to: ' + ip + ' @ ' + new Date());
 }
 
-co(function* client(){
-    yield checkAndUpdate();
-    setInterval(co.wrap(client), config.interval);
-}).catch(function (error) {
-    console.err(error);
+suspend.run(function* client(){
+    yield* checkAndUpdate();
+    setTimeout(suspend(client), config.interval);
+}, function (err) {
+    if (err) console.error(err);
 });
