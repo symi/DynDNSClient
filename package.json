@@ -1,8 +1,24 @@
 {
-  "name": "DynDNSClient",
-  "description": "Node DynamicDNS Client",
-  "version": "0.0.1",
+  "name": "simple-dynamic-dns-client",
+  "description": "A simple DynamicDNS Client",
+  "version": "0.1",
   "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+      "type": "git",
+      "url": "git+https://github.com/symi/simple-dynamic-dns-client.git"
+  },
+  "bugs": {
+      "url": "https://github.com/symi/simple-dynamic-dns-client/issues"
+  },
+  "homepage": "https://github.com/symi/simple-dynamic-dns-client#readme",
+  "keywords": [
+    "dynamic dns",
+    "dynamic",
+    "dns"
+  ],
   "author": "Si Levy <simonjlevy@gmail.com>",
   "license": "MIT",
   "dependencies": {
