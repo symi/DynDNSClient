@@ -23,7 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "request": "^2.60.0",
-    "suspend": "^0.6.1",
+    "suspend": "^0.7.0",
     "xml2js": "^0.4.9"
   }
 }
